@@ -18,8 +18,6 @@ private typealias FileId = Long
  */
 class FileDownloader(private val context: Context) {
 
-    private val downloadingFiles = HashMap<FileId, Boolean>()
-
     /**
      * Download a file
      *
@@ -31,8 +29,7 @@ class FileDownloader(private val context: Context) {
         val request = prepareRequest(Uri.parse(url), fileName)
         val manager = prepareDownloadManager()
 
-        val fileId = manager.enqueue(request)
-        downloadingFiles[fileId] = true
+        manager.enqueue(request)
         context.registerReceiver(
             receiver,
             IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
@@ -43,10 +40,7 @@ class FileDownloader(private val context: Context) {
 
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            if (id in downloadingFiles) {
-                Log.d("DOWNLOADER", "Downloading file with ID=$id has finished!")
-                downloadingFiles.remove(id)
-            }
+            Log.d("DOWNLOADER", "Downloading file with ID=$id has finished!")
             context?.unregisterReceiver(this)
         }
     }
